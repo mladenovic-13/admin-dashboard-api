@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
-import { db } from "../../../firebase";
 import { checkIfAdmin, checkIfAuth } from "../../auth/authMiddleware";
 import { IUser } from "../../types/data";
+import { addDocument, getCollection, getDocument } from "../../utils/data";
 
 const userRouter = express.Router();
 
@@ -12,12 +12,8 @@ userRouter.get("/", async (req: Request, res: Response) => {
   let users: FirebaseFirestore.DocumentData[] = [];
 
   try {
-    const usersSnapshot = await db.collection("users").get();
-    usersSnapshot.forEach((user) => {
-      users.push(user.data());
-    });
-    if (users) res.json(users);
-    else throw new Error();
+    const users = await getCollection<IUser>("users");
+    res.status(200).json(users);
   } catch (error) {
     res.status(404).send({ message: "Users not found." });
   }
@@ -26,11 +22,8 @@ userRouter.get("/", async (req: Request, res: Response) => {
 // GET USER BY UID
 userRouter.get("/:id", async (req: Request, res: Response) => {
   try {
-    let user: IUser;
-    const userSnapshot = await db.collection("users").doc(req.params.id).get();
-    user = userSnapshot.data() as IUser;
-    if (user) res.status(200).json(user);
-    else throw new Error();
+    const user = await getDocument<IUser>(req.params.id);
+    res.status(200).json(user);
   } catch (error) {
     res.status(404).send({ message: "User not found." });
   }
@@ -40,9 +33,8 @@ userRouter.get("/:id", async (req: Request, res: Response) => {
 userRouter.post("/", checkIfAdmin, async (req: Request, res: Response) => {
   try {
     const { user } = req.body;
-    const userSnapshot = await db.collection("users").add(user);
-    if (userSnapshot.id) res.status(200).json(user);
-    else throw new Error();
+    const newUser = await addDocument<IUser>("users", user);
+    res.status(200).json(newUser);
   } catch (error) {
     res.status(404).send({ message: "User can not be created." });
   }

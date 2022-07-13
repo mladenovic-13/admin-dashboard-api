@@ -23,9 +23,9 @@ app.use(express.json());
 app.post("/make-admin", async (req: Request, res: Response) => {
   const { userId } = req.body; // firebase uid for user
 });
-app.use("/api/user", userRouter);
-app.use("/api/product", productRouter);
-app.use("/api/order", orderRouter);
+app.use("/api/users", userRouter);
+app.use("/api/products", productRouter);
+app.use("/api/orders", orderRouter);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
