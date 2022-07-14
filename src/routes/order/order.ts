@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { db } from "../../../firebase";
 import { checkIfAdmin, checkIfAuth } from "../../auth/authMiddleware";
 import { IOrder } from "../../types/data";
+import { getCollection, getDocument } from "../../utils/data";
 
 const orderRouter = express.Router();
 
@@ -9,15 +10,9 @@ orderRouter.use(checkIfAuth);
 
 // GET ALL USERS
 orderRouter.get("/", async (req: Request, res: Response) => {
-  let orders: FirebaseFirestore.DocumentData[] = [];
-
   try {
-    const ordersSnapshot = await db.collection("orders").get();
-    ordersSnapshot.forEach((order) => {
-      orders.push(order.data());
-    });
-    if (orders) res.json(orders);
-    else throw new Error();
+    const orders = await getCollection<IOrder>("orders");
+    res.status(200).json(orders);
   } catch (error) {
     res.status(404).send({ message: "Orders not found." });
   }
@@ -26,14 +21,8 @@ orderRouter.get("/", async (req: Request, res: Response) => {
 // GET USER BY UID
 orderRouter.get("/:id", async (req: Request, res: Response) => {
   try {
-    let order: IOrder;
-    const orderSnapshot = await db
-      .collection("orders")
-      .doc(req.params.id)
-      .get();
-    order = orderSnapshot.data() as IOrder;
-    if (order) res.status(200).json(order);
-    else throw new Error();
+    const order = await getDocument<IOrder>("orders", req.params.id);
+    res.status(200).json(order);
   } catch (error) {
     res.status(404).send({ message: "Order not found." });
   }
