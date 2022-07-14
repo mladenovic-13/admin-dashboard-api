@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express";
 import { db } from "../../../firebase";
 import { checkIfAdmin, checkIfAuth } from "../../auth/authMiddleware";
-import { IProduct, IUser } from "../../types/data";
+import { IOrder, IProduct, IUser } from "../../types/data";
+import { getCollection, getDocument } from "../../utils/data";
 
 const productRouter = express.Router();
 
@@ -12,11 +13,8 @@ productRouter.get("/", async (req: Request, res: Response) => {
   let products: FirebaseFirestore.DocumentData[] = [];
 
   try {
-    const productsSnapshot = await db.collection("products").get();
-    productsSnapshot.forEach((product) => {
-      products.push(product.data());
-    });
-    res.json();
+    const products = await getCollection<IProduct>("products");
+    res.status(200).json(products);
   } catch (error) {
     res.status(404).send({ message: "Products not found." });
   }
@@ -25,14 +23,8 @@ productRouter.get("/", async (req: Request, res: Response) => {
 // GET USER BY UID
 productRouter.get("/:id", async (req: Request, res: Response) => {
   try {
-    let product: IProduct;
-    const productSnapshot = await db
-      .collection("products")
-      .doc(req.params.id)
-      .get();
-    product = productSnapshot.data() as IProduct;
-    if (product) res.status(200).json(product);
-    else throw new Error();
+    const product = await getDocument<IOrder>("products", req.params.id);
+    res.status(200).json(product);
   } catch (error) {
     res.status(404).send({ message: "Product not found." });
   }

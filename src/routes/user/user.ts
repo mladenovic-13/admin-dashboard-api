@@ -9,8 +9,6 @@ userRouter.use(checkIfAuth);
 
 // GET ALL USERS
 userRouter.get("/", async (req: Request, res: Response) => {
-  let users: FirebaseFirestore.DocumentData[] = [];
-
   try {
     const users = await getCollection<IUser>("users");
     res.status(200).json(users);
@@ -22,7 +20,7 @@ userRouter.get("/", async (req: Request, res: Response) => {
 // GET USER BY UID
 userRouter.get("/:id", async (req: Request, res: Response) => {
   try {
-    const user = await getDocument<IUser>(req.params.id);
+    const user = await getDocument<IUser>("users", req.params.id);
     res.status(200).json(user);
   } catch (error) {
     res.status(404).send({ message: "User not found." });

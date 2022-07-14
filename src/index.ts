@@ -6,6 +6,7 @@ import morgan from "morgan";
 import userRouter from "./routes/user/user";
 import productRouter from "./routes/product/product";
 import orderRouter from "./routes/order/order";
+import widgetRouter from "./routes/widget/widget";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.post("/make-admin", async (req: Request, res: Response) => {
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/orders", orderRouter);
+app.use("/api/widget", widgetRouter);
 
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
